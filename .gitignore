@@ -1,0 +1,10 @@
+my_api_secrets.py
+Untitled.ipynb
+geckodriver.log
+*checkpoint.ipynb
+*checkpoint.py
+*checkpoint.txt
+*.csv
+*.pyc
+*.pickle
+*.h5
