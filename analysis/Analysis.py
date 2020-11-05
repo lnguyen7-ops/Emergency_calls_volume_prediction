@@ -1,4 +1,6 @@
 # ANALYSIS:
+import numpy as np
+import pandas as pd
 # partail autocorrelation
 import statsmodels.api as sm
 from statsmodels.tsa.stattools import pacf
@@ -153,9 +155,9 @@ def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_
                                   metric=MAPE,
                                   input_3d=False)
             
-            # Note that evaluate loss using the model_evaluate function appears to
+            # Note that evaluate loss using the model_evaluate function (as above) appears to
             # make more sense as the function uses recursive_forecasting. However,
-            # recursive_forcasting take some time to run and hence, I will use
+            # recursive_forcasting take some time to run and hence, one could use
             # the native predict method instead.
             #loss = MAPE(y_test, rfr.predict(X_test))
             if loss < min_loss:
@@ -289,7 +291,7 @@ def compile_and_fit(model, X_train, y_train, X_val, y_val, max_epochs=20, patien
 
 def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight", 
                     max_hidden_layers=4, nodes_per_hidden=500, output_nodes=1, 
-                    flatten=False, input_3d=False):
+                    flatten=False, input_3d=False, fh=8):
     '''
     layer_type : str. "dense_straight", "dense_pyramid", "recurrent"
     '''
@@ -354,7 +356,7 @@ def model_evaluate(model, fh, X_test, y_test, metric, input_3d=False):
     X_train : pd.Series or DataFrame
     --------------------------------------------------------
     '''
-    results = []
+    values = [] # evalated metric
     for i in range((X_test.shape[0]-fh)+1): # minimum of 1 iteration
         true = y_test[i:(i+fh)] # setup true values
         # predict values
@@ -364,8 +366,30 @@ def model_evaluate(model, fh, X_test, y_test, metric, input_3d=False):
                                   fh=fh, 
                                   input_3d=input_3d)
         # score/loss of the model
-        results.append(metric(true, pred))
-    return np.mean(results)
+        values.append(metric(true, pred))
+    return np.mean(values)
+
+def arima_evaluate(model, test, fh=8, refit=pd.Series(), metric=MAPE):
+    '''
+    model : SARIMAX model.
+    test : pd Time series. Test data set.
+    fh : int. Forecast horizon.
+    refit : pd Time series. New time series data to refit the model on.
+    '''
+    if not refit.empty:
+        params = model.params # store previous parameters
+        p_d_q = (model.model.k_ar_params,
+                 model.model.k_diff,
+                 model.model.k_ma_params)
+        model = SARIMAX(refit, 
+                    order=p_d_q, 
+                    enforce_stationarity=False, 
+                    enforce_invertibility=False,
+                    trend=None).fit(params, maxiter=1000)
+    pred = model.forecast(steps=fh) # Forcast value
+    true = test[:fh] # true values
+    loss = metric(pred.array, true.array)
+    return pred, loss
 
 # Loss metric
 def sMAPE_tensor(actual, pred):
