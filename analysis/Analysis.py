@@ -10,7 +10,7 @@ from statsmodels.api import tsa # time series analysis
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 # Random forest
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from math import sqrt
 # Plot
 import matplotlib.pyplot as plt
@@ -51,17 +51,23 @@ def get_att_level(data, nhoods, freq, data_proc):
     return att_level
 
 # PARTIAL autocorrelation
-def get_pacf(data, max_lag, ret=False):
+def get_pacf(data, max_lag, plot=True, ret=None):
+    result = None
     abs_pacfs = list(abs(pacf(data, nlags=max_lag)))
     # find best lag (skip the lag=0)
     best_lag = abs_pacfs.index(max(abs_pacfs[1:]))
-    print("Best lag:\t", best_lag)
-    fig, (ax) = plt.subplots(1,1, figsize=(15,3))
-    plot_pacf(data, lags=max_lag, ax=ax)
-    plt.xlabel('Lag')
-    plt.ylabel('Partial Autocorrelation')
-    plt.show()
-    return abs_pacfs if ret else None
+    #print("Best lag:\t", best_lag)
+    if plot:
+        fig, (ax) = plt.subplots(1,1, figsize=(15,3))
+        plot_pacf(data, lags=max_lag, ax=ax)
+        plt.xlabel('Lag')
+        plt.ylabel('Partial Autocorrelation')
+        plt.show()
+    if ret=="all":
+        result = abs_pacfs
+    elif ret=="best_lag":
+        result = best_lag
+    return result
 
 # DECOMPOSITION
 def decomposition(data, lag, show="all"):
@@ -117,7 +123,7 @@ def arima_best(fh, train, val, p_range, d_range, q_range):
                         trend=None).fit(maxiter=1000)
                 # make prediction
                 predictions = model.forecast(fh)
-                loss = mean_squared_error(true, predictions)
+                loss = mean_absolute_error(true, predictions)
                 #loss = sMAPE(val, predictions)
                 if loss < min_loss:
                     min_loss = loss
@@ -125,7 +131,7 @@ def arima_best(fh, train, val, p_range, d_range, q_range):
                     best_p = p
                     best_d = d
                     best_q = q
-                    print(f"{p}, {d}, {q}: Validation MSE ", round(min_loss, 4), end="\r")
+                    print(f"{p}, {d}, {q}: Validation MAE ", round(min_loss, 4), end="\r")
     print("-"*50)
     #return (best_p, best_d, best_q)
     return best_model, (best_p, best_d, best_q)
@@ -141,7 +147,9 @@ def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_
     rfr_best = None # best model
     for n in n_estimators:
         for depth in depths:
-            rfr = RandomForestRegressor(n_estimators=n, 
+            # note that MSE is 10x faster than MAE in sklearn.
+            rfr = RandomForestRegressor(n_estimators=n,
+                                        criterion="mse", # use mean square error
                                         max_depth=depth, 
                                         n_jobs=-1, 
                                         verbose=0,
@@ -152,7 +160,7 @@ def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_
                                   fh=fh,
                                   X_test=X_test[:fh],
                                   y_test=y_test[:fh],
-                                  metric=MAPE,
+                                  metric=mean_absolute_error, # sklearn mean absolute error
                                   input_3d=False)
             
             # Note that evaluate loss using the model_evaluate function (as above) appears to
@@ -162,7 +170,7 @@ def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_
             #loss = MAPE(y_test, rfr.predict(X_test))
             if loss < min_loss:
                 min_loss = loss
-                print(f"{n}, {depth}, MAPE: ", round(loss, 4), end="\r")
+                print(f"{n}, {depth}, MAE: ", round(loss, 4), end="\r")
                 rfr_best = rfr
     return rfr_best
 
@@ -268,7 +276,8 @@ def build_rnn_pyramid(num_recurrent_layers, nodes_layer1,
     model.add(Dense(num_output_nodes, activation="relu"))
     return model
 
-def compile_and_fit(model, X_train, y_train, X_val, y_val, max_epochs=20, patience=2):
+def compile_and_fit(model, X_train, y_train, X_val, y_val, 
+                    max_epochs=20, patience=2, verbose=1, loss_metric="MAE"):
     '''
     Compile and fit tensor.keras models with early stoping condition.
     -----------------------------------------------
@@ -278,20 +287,25 @@ def compile_and_fit(model, X_train, y_train, X_val, y_val, max_epochs=20, patien
     early_stopping = EarlyStopping(monitor="val_loss", # check validation loss
                                    mode="min", # keep minimum of validation loss
                                    patience=patience,
-                                   verbose=1,
-                                   min_delta=0.001, # minimum change to classify and improvement
+                                   verbose=verbose,
+                                   min_delta=1*10**(-4), # minimum change to classify and improvement
                                    restore_best_weights=True)
-    model.compile(loss="mse", optimizer="adam")
+    # Define possible loss metrics to be used for model.
+    loss_metrics = {"MAE": "mae",
+                    "MSE": "mse",
+                    "sMAPE": sMAPE_tensor,
+                    "MAPE": MAPE_tensor}
+    model.compile(loss=loss_metrics[loss_metric], optimizer="adam")
     history = model.fit(X_train, y_train, 
                         validation_data=(X_val, y_val), 
                         epochs=max_epochs, 
-                        verbose=0,
+                        verbose=verbose,
                         callbacks=[early_stopping])
     return history
 
 def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight", 
                     max_hidden_layers=4, nodes_per_hidden=500, output_nodes=1, 
-                    flatten=False, input_3d=False, fh=8):
+                    flatten=False, input_3d=False, fh=8, verbose=1, loss_metric="MAE"):
     '''
     layer_type : str. "dense_straight", "dense_pyramid", "recurrent"
     '''
@@ -305,10 +319,16 @@ def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight
                   "dense_pyramid": X_train.shape[1:],
                   "recurrent_straight": [None, output_nodes],
                   "recurrent_pyramid": [None, output_nodes]}
+    # Define possible loss metrics to be used for model.
+    loss_metrics = {"MAE": MAE,
+                    "MSE": MSE,
+                    "sMAPE": sMAPE,
+                    "MAPE": MAPE}
     # record the iteration results
     log = {"hidden_layers": [],
-           "Val_MSE": []}
+           f"Val_{loss_metric}": []}
     model_best = model_history = None
+    num_hidden = None # best number of hidden layers
     min_loss = float("inf")
     # Tune number of hidden layer
     for i in range(2, max_hidden_layers+1):
@@ -321,25 +341,32 @@ def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight
                                   X_val=X_val,
                                   y_val=y_val,
                                   max_epochs=100,
-                                  patience=10)
+                                  patience=10,
+                                  verbose=verbose,
+                                  loss_metric=loss_metric)
+        '''
         # evaluate the model
         loss = model_evaluate(model=model,
                               fh=fh,
                               X_test=X_val,
                               y_test=y_val,
-                              metric=mean_squared_error,
+                              metric=mean_absolute_error,
                               input_3d=input_3d)
-        print(f"Hidden layers: {i}, Validation MSE: ", round(loss, 4))
-        print("-"*50)
+        '''
+        loss = loss_metrics[loss_metric](model.predict(X_val), y_val)
+        #print(f"Hidden layers: {i}, Validation MAE: ", round(loss, 4))
+        #print("-"*50)
         # add info the log
         log["hidden_layers"].append(i)
-        log["Val_MSE"].append(loss)
+        log[f"Val_{loss_metric}"].append(loss)
         
         if loss < min_loss:
             min_loss = loss
-            #print(f"Hidden layers: {i}, Validation MSE: ", round(loss, 4), end="\r")
+            #print(f"Hidden layers: {i}, Validation MAE: ", round(loss, 4))
             model_best = model
             model_history = history
+            num_hidden = i
+    print(f"Best # hidden layers: {num_hidden}, Validation {loss_metric}: ", round(loss, 4))
     return model_best, model_history, log
 
 
@@ -369,28 +396,6 @@ def model_evaluate(model, fh, X_test, y_test, metric, input_3d=False):
         values.append(metric(true, pred))
     return np.mean(values)
 
-def arima_evaluate(model, test, fh=8, refit=pd.Series(), metric=MAPE):
-    '''
-    model : SARIMAX model.
-    test : pd Time series. Test data set.
-    fh : int. Forecast horizon.
-    refit : pd Time series. New time series data to refit the model on.
-    '''
-    if not refit.empty:
-        params = model.params # store previous parameters
-        p_d_q = (model.model.k_ar_params,
-                 model.model.k_diff,
-                 model.model.k_ma_params)
-        model = SARIMAX(refit, 
-                    order=p_d_q, 
-                    enforce_stationarity=False, 
-                    enforce_invertibility=False,
-                    trend=None).fit(params, maxiter=1000)
-    pred = model.forecast(steps=fh) # Forcast value
-    true = test[:fh] # true values
-    loss = metric(pred.array, true.array)
-    return pred, loss
-
 # Loss metric
 def sMAPE_tensor(actual, pred):
     '''
@@ -412,6 +417,37 @@ def MAPE(actual, pred):
     Mean Absolute Percent Error.
     '''
     return np.mean(np.abs(actual - pred) / np.abs(actual)) * 100
+
+def MAPE_tensor(actual, pred):
+    return tf.reduce_mean(tf.abs(actual - pred) / tf.abs(actual)) * 100
+
+def MAE(actual, pred):
+    return mean_absolute_error(actual, pred)
+
+def MSE(actual, pred):
+    return mean_squared_error(actual, pred)
+
+def arima_evaluate(model, test, fh=8, refit=pd.Series(), metric=MAPE):
+    '''
+    model : SARIMAX model.
+    test : pd Time series. Test data set.
+    fh : int. Forecast horizon.
+    refit : pd Time series. New time series data to refit the model on.
+    '''
+    if not refit.empty:
+        params = model.params # store previous parameters
+        p_d_q = (model.model.k_ar_params,
+                 model.model.k_diff,
+                 model.model.k_ma_params)
+        model = SARIMAX(refit, 
+                    order=p_d_q, 
+                    enforce_stationarity=False, 
+                    enforce_invertibility=False,
+                    trend=None).fit(params, maxiter=1000)
+    pred = model.forecast(steps=fh) # Forcast value
+    true = test[:fh] # true values
+    loss = metric(pred.array, true.array)
+    return pred, loss
 
 ##################################################
 # predict method for tabular form
@@ -446,7 +482,7 @@ def recursive_forecast(model, X, start, fh, input_3d=False):
     return pred
 
 # Plot
-def plot(data, labels):
+def plot(data, labels, y_range=None):
     '''
     Make overlay plot of given data and labels.
     ----------------------------------------
@@ -457,4 +493,6 @@ def plot(data, labels):
     for i, dat in enumerate(data):
         plt.plot(dat, label=labels[i], marker="o")
     plt.legend()
+    if y_range != None:
+        plt.ylim(y_range)
     plt.show()

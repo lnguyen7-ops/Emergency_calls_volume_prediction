@@ -10,3 +10,7 @@
 	- tweets_stream_script.py 	Script to setup live stream tweets which contain gps from Detroit city.	
 - Data
 	- Google Drive: https://drive.google.com/drive/folders/1w9fi_HiFsuB-IEVFP4hwfN6q9jEIL2sx?usp=sharing
+
+- Models:
+    - no version: use MSE and MAPE for optimization
+    - 3h_FID...v1: use MAE for optimization

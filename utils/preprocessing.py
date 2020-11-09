@@ -98,7 +98,7 @@ class Preprocess:
         return df
            
     ###################################################################    
-    def process_calls(self, paths, file=None):
+    def process_calls(self, paths, out_file=None):
         '''
         paths: list
                 List of 911 calls csv files to process.
@@ -184,10 +184,10 @@ class Preprocess:
         df.set_index("call_timestamp", inplace=True)
         
         # WRITE CLEAN DATAFRAME TO CSV FILE
-        if file==None:
-            file = "data/Detroit_911_calls/911_Calls_2020_cleaned.csv"
-        df.to_csv(file, mode="w", header=True, index=True)
-        print("Write to: ", file)
+        if out_file==None:
+            out_file = "data/Detroit_911_calls/911_Calls_2020_cleaned.csv"
+        df.to_csv(out_file, mode="w", header=True, index=True)
+        print("Write to: ", out_file)
         #return df
         
     ###############################################################################
