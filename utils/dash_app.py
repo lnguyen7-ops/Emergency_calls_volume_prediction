@@ -10,7 +10,11 @@ from dash.dependencies import Input, Output
 # to be used with date_picker
 from datetime import datetime as dt
 
-app = dash.Dash(__name__)
+#app = dash.Dash(__name__)
+app = dash.Dash("utils")
+#app.css.append_css({"external_url": "/static/reset.css"})
+#app.server.static_folder = "static"
+#dcc._css_dist[0]['relative_package_path'].append('static/reset.css')
 
 # ---------------------------------------------
 # Read in csv data file
@@ -25,29 +29,37 @@ with open("../data/detroit_geo.json") as json_file:
     detroit_geo = json.load(json_file)
 
 #-------------------------------------------------
+# DASH APP
+# Background color
+colors = {
+    'background': '#006e99',
+    'text': '#7FDBFF'
+}
 # App layout (Dash components all go inside layout)
-app.layout = html.Div([
-	# Title of the web-app
-	html.H1("Detroit City", style={"text-align": "center"}),
-	html.H2("Police Attention Level Needed", style={"text-align": "center"}),
+app.layout = html.Div(
+	#style={"backgroundColor": colors["background"], "pad": 0},
+	children = [
+		# Title of the web-app
+		html.H1("Detroit City", style={"text-align": "center"}),
+		html.H2("Police Attention Level Needed", style={"text-align": "center"}),
 
-	# Date picker
-	html.Div(
-		[dcc.DatePickerSingle(id="dt_pick_single", 
-							date=dt(2020,11,13),
-							min_date_allowed=dt(2020,11,7),
-							max_date_allowed=dt(2020,11,13))],
-		style={"padding-left": "25%"}
-	),
+		# Date picker
+		html.Div(
+			[dcc.DatePickerSingle(id="dt_pick_single", 
+								date=dt(2020,11,13),
+								min_date_allowed=dt(2020,11,7),
+								max_date_allowed=dt(2020,11,13))],
+			style={"padding-left": "25%"}
+		),
 
-	# Element to show selected date as text
-	html.H2(html.Div(id="output_container", children=[], style={"padding-left":"25%"})),
-	html.Br(),
+		# Element to show selected date as text
+		html.H2(html.Div(id="output_container", children=[], style={"padding-left":"25%"})),
+		html.Br(),
 
-	# Choropleth map
-	html.Div(
-		[dcc.Graph(id="att_level_map", figure={})],
-		style={"width": "50%", "padding-left":"25%"})
+		# Choropleth map
+		html.Div(
+			[dcc.Graph(id="att_level_map", figure={})],
+			style={"padding-left":"25%", "padding-right": "25%"})
 	])
 
 #------------------------------------------------
@@ -101,7 +113,7 @@ def update_graph(date_picked):
 	active = 0 # initial active trace
 	for i in range(len(fig.data)):
 		fig.data[i].visible = False
-	fig.data[active].visible = True
+	fig.data[active].visible = True # set the active trace as visible.
 	# create slider
 	steps = []
 	for i in range(len(fig.data)):
@@ -116,12 +128,12 @@ def update_graph(date_picked):
 	            "pad": {"t": 5, "l":25, "b":10},
 	            "steps": steps}]
 
-	fig.update_layout(mapbox_style="carto-positron",
+	fig.update_layout(mapbox_style="open-street-map",
 	                  mapbox_zoom=10,
 	                  mapbox_center={"lat": lat, "lon": lng},
 	                  sliders=sliders)
 	fig.update_layout(autosize=True,
-						height=600,
+						height=700,
 						margin={"r":0, "t":0, "l":0, "b":0},
 	                  font={"size": 15})
 	return container, fig
