@@ -25,7 +25,7 @@ FIDs = [text.split(",")[0] for text in df.columns[:-2]] # skip last 2 columns
 nhood_names = [text.split(",")[1] for text in df.columns[:-2]] # skip last 2 columns
 # Read in geo-json file
 # read in Detroit neighborhood geojson.
-with open("../data/detroit_geo.json") as json_file:
+with open("../data/raw/detroit_geo.json") as json_file:
     detroit_geo = json.load(json_file)
 
 #-------------------------------------------------
