@@ -262,9 +262,9 @@ class Raw_data_proc:
                 if not df.empty:
                     try:
                         # if file already exist
-                        pd.read_csv(f"data/{key}{num}.csv", sep=",", nrows=1)
+                        pd.read_csv(f"data/raw/tweets/{key}{num}.csv", sep=",", nrows=1)
                         # don't rewrite column headers
-                        df.to_csv(f"data/{key}{num}.csv", mode="a", sep=",", header=False, index=False)
+                        df.to_csv(f"data/raw/tweets/{key}{num}.csv", mode="a", sep=",", header=False, index=False)
                     except:
                         # if file NOT exist. Then write column header
-                        df.to_csv(f"data/{key}{num}.csv", mode="a", sep=",", header=True, index=False)
+                        df.to_csv(f"data/raw/tweets/{key}{num}.csv", mode="a", sep=",", header=True, index=False)
