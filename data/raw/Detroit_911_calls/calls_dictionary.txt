@@ -1,0 +1,18 @@
+- category:
+	- TRAFF2: Traffic incident with injuries
+	- TRF STOP:	Traffic stops, initiated by officers
+	- SPCL ATT:	Special attention
+	- STRTSHFT:	Start of shift information. Initiated by officers
+	- REMARKS:	Remarks by officers
+
+	- FA IP:	Felonious assault IP (in pursuit?)
+
+	- ACCUNK:	 collision between an automobile and at the time of the call for emergency services it is unknown if anyone is injured or impaired.
+
+	- LARCREPT:	Larceny report
+	- FRAUDRPT:	Fraud report
+
+	- INVAUTO:	Investigate auto
+	- BUS BRD:	Bus boarding
+	- TOW: 		Towing
+	- HNGUP:	Calls that were hung-up.

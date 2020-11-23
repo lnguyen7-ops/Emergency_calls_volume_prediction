@@ -135,7 +135,7 @@ class Preprocess:
                 calls[col] = calls[col].str.strip()
 
             # Drop calls in these categories as not related to this public safety
-            cags_to_drop = ["HNGUP", "STRTSHFT", "TRF STOP", 
+            cags_to_drop = ["HNGUP", "STRTSHFT", 
                             "REMARKS", "BUS BRD", "TOW"]
             mask = calls["category"].apply(lambda x: x not in cags_to_drop)
             calls = calls.loc[mask,:]
@@ -146,10 +146,9 @@ class Preprocess:
             calls.drop(index=mask, inplace=True)
             
             # KEEP ONLY COLUMNS RELEVANT TO THIS STUDY
-            calls = calls[["call_timestamp", "incident_id", "officerinitiated", "priority",
-                          "calldescription", "category", "intaketime", "dispatchtime",
-                          "traveltime", "totalresponsetime", "time_on_scene", "totaltime",
-                          "longitude", "latitude"]]
+            calls = calls[["call_timestamp", "incident_id", "officerinitiated", 
+                            "priority", "calldescription", "category", 
+                            "neighborhood", "longitude", "latitude"]]
             
             # convert call_timestamp to datetime64
             # convert priority to int8
@@ -168,12 +167,13 @@ class Preprocess:
         df = pd.concat(df, axis=0, ignore_index=True)
         # REMOVE DUPLICATES
         df = df.loc[~df.duplicated(subset="incident_id"),:]
-        # Re-label the calls' neighborhood since 2 neighborhoods has the same name
+        # Re-label the calls' neighborhood Oak Grove since 2 neighborhoods has the same name
         df["FID_nhood"] = df.apply(self.city.which_nhood,
                                    axis=1,
                                    df=True,
                                    lng="longitude",
-                                   lat="latitude")
+                                   lat="latitude",
+                                   nhood=["Oak Grove"])
         # Drop calls without neighborhood (after neighborhood relabeling)
         df.dropna(axis=0, how="any", subset=["FID_nhood"], inplace=True)
         # Sort call_timestamp in ascending order
