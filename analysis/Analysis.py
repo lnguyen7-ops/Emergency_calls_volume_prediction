@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 # partail autocorrelation
 import statsmodels.api as sm
-from statsmodels.tsa.stattools import pacf
-from statsmodels.graphics.tsaplots import plot_pacf
+from statsmodels.tsa.stattools import pacf, acf
+from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
 from statsmodels.api import tsa # time series analysis
 # ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -51,20 +51,25 @@ def get_att_level(data, nhoods, freq, data_proc):
     return att_level
 
 # PARTIAL autocorrelation
-def get_pacf(data, max_lag, plot=True, ret=None):
-    result = None
-    abs_pacfs = list(abs(pacf(data, nlags=max_lag)))
+def get_acf(data, max_lag, corr="acf", plot=True, ret=None):
+    '''
+    type: str. "acf": autocorrelation. "pacf": partial autocorrelation
+    '''
+    funcs = {"acf":[acf, plot_acf],
+             "pacf": [pacf, plot_pacf]}
+    abs_acfs = result = None
+    abs_acfs = list(abs(funcs[corr][0](data, nlags=max_lag)))
     # find best lag (skip the lag=0)
-    best_lag = abs_pacfs.index(max(abs_pacfs[1:]))
+    best_lag = abs_acfs.index(max(abs_acfs[1:]))
     #print("Best lag:\t", best_lag)
     if plot:
         fig, (ax) = plt.subplots(1,1, figsize=(15,3))
-        plot_pacf(data, lags=max_lag, ax=ax)
+        funcs[corr][1](data, lags=max_lag, ax=ax, zero=False)
         plt.xlabel('Lag')
-        plt.ylabel('Partial Autocorrelation')
+        plt.ylabel(corr)
         plt.show()
     if ret=="all":
-        result = abs_pacfs
+        result = abs_acfs
     elif ret=="best_lag":
         result = best_lag
     return result
