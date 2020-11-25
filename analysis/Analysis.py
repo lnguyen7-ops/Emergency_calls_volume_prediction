@@ -54,13 +54,15 @@ def get_att_level(data, nhoods, freq, data_proc):
 def get_acf(data, max_lag, corr="acf", plot=True, ret=None):
     '''
     type: str. "acf": autocorrelation. "pacf": partial autocorrelation
+    --------------------------------
+    return: if ret=="best_lag", return tuple (best_lag, acf value)
     '''
     funcs = {"acf":[acf, plot_acf],
              "pacf": [pacf, plot_pacf]}
     abs_acfs = result = None
     abs_acfs = list(abs(funcs[corr][0](data, nlags=max_lag)))
     # find best lag (skip the lag=0)
-    best_lag = abs_acfs.index(max(abs_acfs[1:]))
+    best_lag = (abs_acfs.index(max(abs_acfs[1:])), max(abs_acfs[1:]))
     #print("Best lag:\t", best_lag)
     if plot:
         fig, (ax) = plt.subplots(1,1, figsize=(15,3))
