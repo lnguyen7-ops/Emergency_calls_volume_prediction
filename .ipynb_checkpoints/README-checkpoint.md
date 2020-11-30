@@ -1,3 +1,8 @@
+- WatchMe video:
+    - Don't want to read, watch this 3-minutes summary video instead.
+    <video  width="320" height="240" control>
+    <source src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" type="video/mp4">
+    </video>
 - Notebooks:
 	- 01_Data_gathering.ipynb	Notebook to gather 911 calls, neighborhood bounding box, and tweets.
 	- 02_Main.ipynb				Main notebook. This include, data processing and all analysis and modeling
@@ -10,7 +15,9 @@
 	- tweets_stream_script.py 	Script to setup live stream tweets which contain gps from Detroit city.	
 - Data
 	- Google Drive: https://drive.google.com/drive/folders/1w9fi_HiFsuB-IEVFP4hwfN6q9jEIL2sx?usp=sharing
-
+	- Detroit_911_calls
+		- 911_Calls_For_Service.csv: 911 calls from Sep 2016 to Sep 2020
+		- 911_Calls_2020_file\*.csv: 2020 calls
 - Models:
     - no version: use MSE and MAPE for optimization
     - 3h_FID...v1: use MAE for optimization

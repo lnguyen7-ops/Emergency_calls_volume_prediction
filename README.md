@@ -1,3 +1,8 @@
+- WatchMe video:
+    - Don't want to read, watch this 3-minutes summary video instead.
+    <video  width="320" height="240" control>
+    <source src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" type="video/mp4">
+    </video>
 - Notebooks:
 	- 01_Data_gathering.ipynb	Notebook to gather 911 calls, neighborhood bounding box, and tweets.
 	- 02_Main.ipynb				Main notebook. This include, data processing and all analysis and modeling
