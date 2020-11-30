@@ -101,7 +101,7 @@ def decomposition(data, lag, show="all"):
     plt.tight_layout()
     plt.show()
 
-def arima_best(fh, train, val, p_range, d_range, q_range):
+def arima_best(fh, train, val, p_range, d_range, q_range, loss_metric="MSE"):
     '''
     fh : int. Forecast horizon. While validation set can be longer than
             the forecast horizon, only the fh portion of the validation set
@@ -130,21 +130,20 @@ def arima_best(fh, train, val, p_range, d_range, q_range):
                         trend=None).fit(maxiter=1000)
                 # make prediction
                 predictions = model.forecast(fh)
-                loss = mean_absolute_error(true, predictions)
-                #loss = sMAPE(val, predictions)
+                loss = loss_func(loss_metric, tensor=False)(true, predictions)
                 if loss < min_loss:
                     min_loss = loss
                     best_model = model
                     best_p = p
                     best_d = d
                     best_q = q
-                    print(f"{p}, {d}, {q}: Validation MAE ", round(min_loss, 4), end="\r")
+                    print(f"{p}, {d}, {q}: Validation {loss_metric} ", round(min_loss, 4), end="\r")
     print("-"*50)
     #return (best_p, best_d, best_q)
     return best_model, (best_p, best_d, best_q)
     
 
-def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_depth, fh=None):
+def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_depth, fh=None, loss_metric="MSE"):
     '''
     Return model with best tuned hyperparameter
     '''
@@ -167,17 +166,17 @@ def rand_forest_reg_best(X_train, y_train, X_test, y_test, max_n_estimator, max_
                                   fh=fh,
                                   X_test=X_test[:fh],
                                   y_test=y_test[:fh],
-                                  metric=mean_absolute_error, # sklearn mean absolute error
+                                  metric=loss_func(loss_metric, tensor=False),
                                   input_3d=False)
             
             # Note that evaluate loss using the model_evaluate function (as above) appears to
             # make more sense as the function uses recursive_forecasting. However,
             # recursive_forcasting take some time to run and hence, one could use
             # the native predict method instead.
-            #loss = MAPE(y_test, rfr.predict(X_test))
+            # loss = MAPE(y_test, rfr.predict(X_test))
             if loss < min_loss:
                 min_loss = loss
-                print(f"{n}, {depth}, MAE: ", round(loss, 4), end="\r")
+                print(f"{n}, {depth}, {loss_metric}: ", round(loss, 4), end="\r")
                 rfr_best = rfr
     return rfr_best
 
@@ -284,7 +283,7 @@ def build_rnn_pyramid(num_recurrent_layers, nodes_layer1,
     return model
 
 def compile_and_fit(model, X_train, y_train, X_val, y_val, 
-                    max_epochs=20, patience=2, verbose=1, loss_metric="MAE"):
+                    max_epochs=20, patience=2, verbose=1, loss_metric="MSE"):
     '''
     Compile and fit tensor.keras models with early stoping condition.
     -----------------------------------------------
@@ -297,12 +296,7 @@ def compile_and_fit(model, X_train, y_train, X_val, y_val,
                                    verbose=verbose,
                                    min_delta=1*10**(-4), # minimum change to classify and improvement
                                    restore_best_weights=True)
-    # Define possible loss metrics to be used for model.
-    loss_metrics = {"MAE": "mae",
-                    "MSE": "mse",
-                    "sMAPE": sMAPE_tensor,
-                    "MAPE": MAPE_tensor}
-    model.compile(loss=loss_metrics[loss_metric], optimizer="adam")
+    model.compile(loss=loss_func(loss_metric, tensor=True), optimizer="adam")
     history = model.fit(X_train, y_train, 
                         validation_data=(X_val, y_val), 
                         epochs=max_epochs, 
@@ -312,7 +306,7 @@ def compile_and_fit(model, X_train, y_train, X_val, y_val,
 
 def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight", 
                     max_hidden_layers=4, nodes_per_hidden=500, output_nodes=1, 
-                    flatten=False, input_3d=False, fh=8, verbose=1, loss_metric="MAE"):
+                    flatten=False, input_3d=False, fh=8, verbose=1, loss_metric="MSE"):
     '''
     layer_type : str. "dense_straight", "dense_pyramid", "recurrent"
     '''
@@ -326,11 +320,6 @@ def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight
                   "dense_pyramid": X_train.shape[1:],
                   "recurrent_straight": [None, output_nodes],
                   "recurrent_pyramid": [None, output_nodes]}
-    # Define possible loss metrics to be used for model.
-    loss_metrics = {"MAE": MAE,
-                    "MSE": MSE,
-                    "sMAPE": sMAPE,
-                    "MAPE": MAPE}
     # record the iteration results
     log = {"hidden_layers": [],
            f"Val_{loss_metric}": []}
@@ -360,7 +349,7 @@ def neural_net_best(X_train, y_train, X_val, y_val, layer_type = "dense_straight
                               metric=mean_absolute_error,
                               input_3d=input_3d)
         '''
-        loss = loss_metrics[loss_metric](model.predict(X_val), y_val)
+        loss = loss_func(loss_metric, tensor=False)(model.predict(X_val), y_val)
         #print(f"Hidden layers: {i}, Validation MAE: ", round(loss, 4))
         #print("-"*50)
         # add info the log
@@ -434,6 +423,24 @@ def MAE(actual, pred):
 def MSE(actual, pred):
     return mean_squared_error(actual, pred)
 
+def loss_func(name, tensor=False):
+    '''
+    tensor : bool. Function to be compatible with Tensorflow optimization.
+    '''
+    # Define possible loss metrics to be used for model.
+    regular = {"MAE": MAE,
+                "MSE": MSE,
+                "sMAPE": sMAPE,
+                "MAPE": MAPE}
+    tensor_compa = {"MAE": "mae",
+                    "MSE": "mse",
+                    "sMAPE": sMAPE_tensor,
+                    "MAPE": MAPE_tensor}
+    if tensor:
+        return tensor_compa[name]
+    else:
+        return regular[name]
+
 def arima_evaluate(model, test, fh=8, refit=pd.Series(), metric=MAPE):
     '''
     model : SARIMAX model.
@@ -489,7 +496,7 @@ def recursive_forecast(model, X, start, fh, input_3d=False):
     return pred
 
 # Plot
-def plot(data, labels, y_range=None):
+def plot(data, labels, y_range=None, y_label=None):
     '''
     Make overlay plot of given data and labels.
     ----------------------------------------
@@ -502,4 +509,6 @@ def plot(data, labels, y_range=None):
     plt.legend()
     if y_range != None:
         plt.ylim(y_range)
+    if y_label != None:
+        plt.ylabel(y_label)
     plt.show()
