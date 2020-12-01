@@ -1,41 +1,41 @@
-- WatchMe video:
-<<<<<<< HEAD
-    - Don't want to read, watch this <a href="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" target="_blank">3-minutes summary video</a> instead.
+- ## **Watch-me video:**
+    - Don't want to read? Watch this 3-minute summary video instead.<br>
+    <a href="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" target="_blank">
+    	<img src="https://df-project-videos.s3.us-east-2.amazonaws.com/Forecast_police_attention_level.png" width="200" class="center">
+    </a>
 
-<figure class="video_container">
-	<iframe src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" frameborder="0" allowfullscreen="true"> </iframe>
-=======
-    - Don't want to read, watch this 3-minutes summary video instead.
-<figure class="video_container">
-<video width="320" controls="true" allowfullscreen="true">
-<source src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" type="video/mp4">
-    Video not supported
-</video>
-</figure>
+- ## **Required packages:**
+	- `shapely`: For working with neighborhood boundary polygons.
+	- `ast`: Abstract syntax trees. Used to process trees of the Python abstract syntax grammar.
+	- `tweepy`: Python library for accessing the Twitter API. Used for gathering tweets in 04_Extended_work.ipynb.
+- ## **Optional packages:**
+	- `tensorflow-gpu 2.2.0`: To use GPU for neural net training.
 
-<figure class="video_container">
-<iframe src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" frameborder="0" allowfullscreen="true"> </iframe>
->>>>>>> b28ecce172909ef7ca4b82410219a0a51458b8b0
-</figure>
+- ## **Notebooks:**
+	- `01_Data_gathering.ipynb`: Notebook to gather 911 calls, and neighborhood bounding box.
+	- `02_EDA_Cleaning_Engineering.ipynb`: This includes exploratory data analysis, data cleaning, and feature engineering.
+	- `03_Extended_work.ipynb`: Notebook contains different models used for forecasting police attention level needed.
+	- `04_Extended_work.ipynb`: Gathering of gps-tagged tweets. Attempted to use gps-tagged tweets counts as additional variable for forecasting of needed police attention level.
 
-- Notebooks:
-	- 01_Data_gathering.ipynb	Notebook to gather 911 calls, neighborhood bounding box, and tweets.
-	- 02_Main.ipynb				Main notebook. This include, data processing and all analysis and modeling
-	- 03_Extended_work.ipynb	Notebook contain EDA analysis of tweets (extended study of this)
-- Python scripts
-	- Detroit_gps.py 			Contain gps coordinates of several points spread out in Detroit city. This is used for tweets gathering purpose.
-	- neighborhoods.py 			Detroit neighborhood class. To be imported. This is used to create neighborhoods object which contain information of neighborhood in Detroit.
-	- preprocessing.py 			Data preprocessing class. To be imported. This is used to create data processing object which contain data processing function.
-	- Twitter_query.py 			Tweets gathering class. To be imported. Gather tweets using rest API or live stream method.
-	- tweets_stream_script.py 	Script to setup live stream tweets which contain gps from Detroit city.	
-- Data
+- ## **Python scripts**
+	- ### **utils**
+		- Detroit_gps.py 			Contain gps coordinates of several points spread out in Detroit city. This is used for tweets gathering purpose.
+		- neighborhoods.py 			Detroit neighborhood class. To be imported. This is used to create neighborhoods object which contain information of neighborhood in Detroit.
+		- preprocessing.py 			Data preprocessing class. To be imported. This is used to create data processing object which contain data processing function.
+		- Twitter_query.py 			Tweets gathering class. To be imported. Gather tweets using rest API or live stream method.
+		- tweets_stream_script.py 	Script to setup live stream tweets which contain gps from Detroit city.
+	- ### **analysis**
+		- `Analysis.py`: Contains all custom functions for model building and analysis in this study.
+		- `TSData.py`: Used to build data object for this study. Data object contains the time-series data for all neighborhoods and all train-validation-test splits.
+
+- ## **Data:**
 	- Google Drive: https://drive.google.com/drive/folders/1w9fi_HiFsuB-IEVFP4hwfN6q9jEIL2sx?usp=sharing
 	- Detroit_911_calls
 		- 911_Calls_For_Service.csv: 911 calls from Sep 2016 to Sep 2020
 		- 911_Calls_2020_file\*.csv: 2020 calls
-- Models:
+
+- ## **Models:**
+	Contains pre-trained models. Note that these pre-trained models were produced using `tensorflow-gpu` and hence only work with `tensorflow-gpu`.
     - no version: use MSE and MAPE for optimization
     - 3h_FID...v1: use MAE for optimization
 
-- Requirements:
-	- Use GPU tensor-flow
