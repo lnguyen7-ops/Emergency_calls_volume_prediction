@@ -1,13 +1,15 @@
-<p style="text-align: center;">
-	# Predictive Police Patrolling
-</p>
+<h1 style="text-align: center;">
+	<b>Predictive Police Patrolling</b>
+</h1>
+
 - ## **Watch-me video:**
     - Don't want to read? Watch this 3-minute summary video instead.<br>
-<span class="center">
+    
+<div style="padding-left:30%; padding-right:30%">
     <a href="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" target="_blank">
-    	<img src="https://df-project-videos.s3.us-east-2.amazonaws.com/Forecast_police_attention_level.png" width="200" class="center">
+    	<img src="https://df-project-videos.s3.us-east-2.amazonaws.com/Forecast_police_attention_level.png" class="center">
     </a>
-</span>
+</div>
 
 - ## **Introduction**
 	- ### **Problem Statement**
