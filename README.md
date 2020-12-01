@@ -1,8 +1,20 @@
+<p style="text-align: center;">
+	# Predictive Police Patrolling
+</p>
 - ## **Watch-me video:**
     - Don't want to read? Watch this 3-minute summary video instead.<br>
+<span class="center">
     <a href="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" target="_blank">
     	<img src="https://df-project-videos.s3.us-east-2.amazonaws.com/Forecast_police_attention_level.png" width="200" class="center">
     </a>
+</span>
+
+- ## **Introduction**
+	- ### **Problem Statement**
+		The goal of this work is to forecast daily police attention level needed for each neighborhoods in Detroit city, Michigan. The forecast is aim at 24 hours with 3-hour increments.
+
+	- ### **Background**
+		Given the increased in number of violent activities recent and how public safety has always been a concern in the community, police patrol is crucial in ensuring public security. In the past, police patrol with random routes. However, this is highly inefficient because the number of available police officers is limited. More recent approach is to use crime hot spots to plan patrol route. However, crime hot spots are based on static information, such as previous year crime record or demographics. This does not address the suggested dynamic nature of emergency need. The work in this report aim at providing a more dynamic forecast (daily in 3-hour intervals)to help police office plan their routes effectively.
 
 - ## **Required packages:**
 	- `shapely`: For working with neighborhood boundary polygons.
