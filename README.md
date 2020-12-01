@@ -5,6 +5,7 @@
 <source src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" type="video/mp4">
     Video not supported
 </video>
+<iframe src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" frameborder="0" allowfullscreen="true"> </iframe>
 </figure>
 
 - Notebooks:
