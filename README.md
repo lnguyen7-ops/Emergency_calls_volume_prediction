@@ -1,8 +1,21 @@
 - WatchMe video:
+<<<<<<< HEAD
     - Don't want to read, watch this <a href="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" target="_blank">3-minutes summary video</a> instead.
 
 <figure class="video_container">
 	<iframe src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" frameborder="0" allowfullscreen="true"> </iframe>
+=======
+    - Don't want to read, watch this 3-minutes summary video instead.
+<figure class="video_container">
+<video width="320" controls="true" allowfullscreen="true">
+<source src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" type="video/mp4">
+    Video not supported
+</video>
+</figure>
+
+<figure class="video_container">
+<iframe src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" frameborder="0" allowfullscreen="true"> </iframe>
+>>>>>>> b28ecce172909ef7ca4b82410219a0a51458b8b0
 </figure>
 
 - Notebooks:
