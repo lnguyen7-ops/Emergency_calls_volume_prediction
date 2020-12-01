@@ -1,10 +1,11 @@
 - WatchMe video:
     - Don't want to read, watch this 3-minutes summary video instead.
-    
+<figure class="video_container">
 <video width="320" controls="true" allowfullscreen="true">
 <source src="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" type="video/mp4">
     Video not supported
 </video>
+</figure>
 
 - Notebooks:
 	- 01_Data_gathering.ipynb	Notebook to gather 911 calls, neighborhood bounding box, and tweets.
