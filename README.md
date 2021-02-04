@@ -4,7 +4,7 @@
 
 - ## **Watch-me video:**
     - Don't want to read? Watch this 3-minute summary video instead.<br>
-    
+
 <div style="padding-left:30%; padding-right:30%">
     <a href="https://df-project-videos.s3.us-east-2.amazonaws.com/Luan_Nguyen_forecast_police_attention_level.mp4" target="_blank">
     	<img src="https://df-project-videos.s3.us-east-2.amazonaws.com/Forecast_police_attention_level.png" class="center">
@@ -33,11 +33,12 @@
 
 - ## **Python scripts**
 	- ### **utils**
-		- Detroit_gps.py 			Contain gps coordinates of several points spread out in Detroit city. This is used for tweets gathering purpose.
-		- neighborhoods.py 			Detroit neighborhood class. To be imported. This is used to create neighborhoods object which contain information of neighborhood in Detroit.
-		- preprocessing.py 			Data preprocessing class. To be imported. This is used to create data processing object which contain data processing function.
-		- Twitter_query.py 			Tweets gathering class. To be imported. Gather tweets using rest API or live stream method.
-		- tweets_stream_script.py 	Script to setup live stream tweets which contain gps from Detroit city.
+		- `dash_app.py`: Build interactive Plotly-dash app to visualize the  forecast as choropleth map.
+		- `Detroit_gps.py`: Contain gps coordinates of several points spread out in Detroit city. This is used for tweets gathering purpose.
+		- `neighborhoods.py`: Detroit neighborhood class. To be imported. This is used to create neighborhoods object which contain information of neighborhood in Detroit.
+		- `preprocessing.py`: Data preprocessing class. To be imported. This is used to create data processing object which contain data processing function.
+		- `Twitter_query.py`: Tweets gathering class. To be imported. Gather tweets using rest API or live stream method.
+		- `tweets_stream_script.py`: Script to setup live stream tweets which contain gps from Detroit city.
 	- ### **analysis**
 		- `Analysis.py`: Contains all custom functions for model building and analysis in this study.
 		- `TSData.py`: Used to build data object for this study. Data object contains the time-series data for all neighborhoods and all train-validation-test splits.

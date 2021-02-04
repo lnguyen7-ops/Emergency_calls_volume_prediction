@@ -1,7 +1,8 @@
 my_api_secrets.py
 Untitled.ipynb
 geckodriver.log
-*checkpoint*
+*checkpoint*/
+__pycache__/
 *.csv
 *.pyc
 *.pickle

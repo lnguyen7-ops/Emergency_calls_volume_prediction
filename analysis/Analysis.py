@@ -114,8 +114,8 @@ def arima_best(fh, train, val, p_range, d_range, q_range, loss_metric="MSE"):
     q_range: tuple of 2
     '''
     # Hyperparameters tunning
-    print("Tuning p, d, q:")
-    print("-"*50)
+    #print("Tuning p, d, q:")
+    #print("-"*50)
     # true values to be scored again
     true = val[:fh]
     min_loss = float("inf")
@@ -124,10 +124,11 @@ def arima_best(fh, train, val, p_range, d_range, q_range, loss_metric="MSE"):
     for p in range(*p_range):
         for d in range(*d_range):
             for q in range(*q_range):
-                model = SARIMAX(train, order=(p,d,q), 
+                model = SARIMAX(train, order=(p,d,q),
+                        seasonal_order=(4, 1, 2, 8), 
                         enforce_stationarity=False, 
                         enforce_invertibility=False,
-                        trend=None).fit(maxiter=1000)
+                        trend=None).fit(maxiter=100, method="powell")
                 # make prediction
                 predictions = model.forecast(fh)
                 loss = loss_func(loss_metric, tensor=False)(true, predictions)
@@ -137,8 +138,8 @@ def arima_best(fh, train, val, p_range, d_range, q_range, loss_metric="MSE"):
                     best_p = p
                     best_d = d
                     best_q = q
-                    print(f"{p}, {d}, {q}: Validation {loss_metric} ", round(min_loss, 4), end="\r")
-    print("-"*50)
+                    #print(f"{p}, {d}, {q}: Validation {loss_metric} ", round(min_loss, 4), end="\r")
+    #print("-"*50)
     #return (best_p, best_d, best_q)
     return best_model, (best_p, best_d, best_q)
     
@@ -461,7 +462,7 @@ def arima_evaluate(model, test, fh=8, refit=pd.Series(), metric=MAPE):
     pred = model.forecast(steps=fh) # Forcast value
     true = test[:fh] # true values
     loss = metric(pred.array, true.array)
-    return pred, loss
+    return pred, true, loss
 
 ##################################################
 # predict method for tabular form
