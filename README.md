@@ -18,12 +18,16 @@
 	- ### **Background**
 		Given the increased in number of violent activities recent and how public safety has always been a concern in the community, police patrol is crucial in ensuring public security. In the past, police patrol with random routes. However, this is highly inefficient because the number of available police officers is limited. More recent approach is to use crime hot spots to plan patrol route. However, crime hot spots are based on static information, such as previous year crime record or demographics. This does not address the suggested dynamic nature of emergency need. The work in this report aim at providing a more dynamic forecast (daily in 3-hour intervals)to help police office plan their routes effectively.
 
-- ## **Required packages:**
-	- `shapely`: For working with neighborhood boundary polygons.
-	- `ast`: Abstract syntax trees. Used to process trees of the Python abstract syntax grammar.
-	- `tweepy`: Python library for accessing the Twitter API. Used for gathering tweets in 04_Extended_work.ipynb.
-- ## **Optional packages:**
-	- `tensorflow-gpu 2.2.0`: To use GPU for neural net training.
+- ## **Setup:**
+	- ### `setup` directory contains the environment setup codes as follows:
+		- `conda.yaml`: setup conda environment.
+		- `nvidia_cuda_supports.sh`: OPTIONAL. This setup the necessary nvidia drivers for tensorflow GPU.
+	- ### **Required packages:**
+		- `shapely`: For working with neighborhood boundary polygons.
+		- `ast`: Abstract syntax trees. Used to process trees of the Python abstract syntax grammar.
+		- `tweepy`: Python library for accessing the Twitter API. Used for gathering tweets in 04_Extended_work.ipynb.
+	- ### **Optional packages:**
+		- `tensorflow-gpu 2.2.0`: To use GPU for neural net training.
 
 - ## **Notebooks:**
 	- `01_Data_gathering.ipynb`: Notebook to gather 911 calls, and neighborhood bounding box.

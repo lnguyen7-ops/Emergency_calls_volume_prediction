@@ -1,0 +1,18 @@
+channels:
+- defaults
+- pytorch
+- pypi
+dependencies:
+- python=3.8
+- dash # Dash by Plotly to create dashboard
+- plotly
+- matplotlib
+- seaborn
+- pandas
+- numpy
+- scikit-learn
+- shapely # For working with neighborhood boundary polygons.
+- pip:
+  - tweepy # API to gather tweets.
+  - tensorflow
+name: improve_neighborhood_safety
