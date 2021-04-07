@@ -14,5 +14,5 @@ dependencies:
 - shapely # For working with neighborhood boundary polygons.
 - pip:
   - tweepy # API to gather tweets.
-  - tensorflow
+  - tensorflow # also support GPU if compatible NVIDIA GPU exists.
 name: improve_neighborhood_safety

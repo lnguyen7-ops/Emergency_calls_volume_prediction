@@ -21,13 +21,13 @@
 - ## **Setup:**
 	- ### `setup` directory contains the environment setup codes as follows:
 		- `conda.yaml`: setup conda environment.
-		- `nvidia_cuda_supports.sh`: OPTIONAL. This setup the necessary nvidia drivers for tensorflow GPU.
 	- ### **Required packages:**
 		- `shapely`: For working with neighborhood boundary polygons.
 		- `ast`: Abstract syntax trees. Used to process trees of the Python abstract syntax grammar.
 		- `tweepy`: Python library for accessing the Twitter API. Used for gathering tweets in 04_Extended_work.ipynb.
-	- ### **Optional packages:**
+	- ### **GPU for computation (OPTIONAL):**
 		- `tensorflow-gpu 2.2.0`: To use GPU for neural net training.
+		- For Uuntu: `pip install tensorflow` already support GPU. However, installation of NVIDIA drivers are needed. See more detail here: https://www.tensorflow.org/install/gpu#software_requirements.
 
 - ## **Notebooks:**
 	- `01_Data_gathering.ipynb`: Notebook to gather 911 calls, and neighborhood bounding box.
