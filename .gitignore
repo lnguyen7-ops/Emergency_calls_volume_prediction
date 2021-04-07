@@ -3,7 +3,4 @@ Untitled.ipynb
 geckodriver.log
 *checkpoint*/
 __pycache__/
-*.csv
 *.pyc
-*.pickle
-*.h5
