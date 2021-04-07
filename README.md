@@ -26,8 +26,9 @@
 		- `ast`: Abstract syntax trees. Used to process trees of the Python abstract syntax grammar.
 		- `tweepy`: Python library for accessing the Twitter API. Used for gathering tweets in 04_Extended_work.ipynb.
 	- ### **GPU for computation (OPTIONAL):**
-		- `tensorflow-gpu 2.2.0`: To use GPU for neural net training.
-		- For Uuntu: `pip install tensorflow` already support GPU. However, installation of NVIDIA drivers are needed. See more detail here: https://www.tensorflow.org/install/gpu#software_requirements.
+		- `tensorflow-gpu 2.2.0`: To use GPU for neural net training. Only need for tensorflow < 1.15.
+		- tensorflow >= 2: `pip install tensorflow` already support GPU. However, installation of NVIDIA drivers are needed. See more detail here: https://www.tensorflow.org/install/gpu#software_requirements.
+		- For Ubuntu 20.04 LTS, here is a good Tensorflow GPU installation instruction: https://towardsdatascience.com/installing-tensorflow-gpu-in-ubuntu-20-04-4ee3ca4cb75d. A PDF copy of this article is also in the `setup` directory.
 
 - ## **Notebooks:**
 	- `01_Data_gathering.ipynb`: Notebook to gather 911 calls, and neighborhood bounding box.

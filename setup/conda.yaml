@@ -4,6 +4,8 @@ channels:
 - pypi
 dependencies:
 - python=3.8
+- jupyter
+- jupyterlab
 - dash # Dash by Plotly to create dashboard
 - plotly
 - matplotlib
