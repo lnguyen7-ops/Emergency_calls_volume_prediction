@@ -39,6 +39,7 @@
 - ## **Python scripts**
 	- ### **utils**
 		- `dash_app.py`: Build interactive Plotly-dash app to visualize the  forecast as choropleth map.
+		- `get_data.py`: To be imported. Contain functions used to gather 911 records and neighborhood boundaries from city of Detroit ArcGIS API.
 		- `Detroit_gps.py`: Contain gps coordinates of several points spread out in Detroit city. This is used for tweets gathering purpose.
 		- `neighborhoods.py`: Detroit neighborhood class. To be imported. This is used to create neighborhoods object which contain information of neighborhood in Detroit.
 		- `preprocessing.py`: Data preprocessing class. To be imported. This is used to create data processing object which contain data processing function.

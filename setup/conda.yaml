@@ -15,6 +15,7 @@ dependencies:
 - scikit-learn
 - shapely # For working with neighborhood boundary polygons.
 - pip:
+  - APScheduler # for scheduling Tweets gather.
   - tweepy # API to gather tweets.
   - tensorflow # also support GPU if compatible NVIDIA GPU exists.
 name: improve_neighborhood_safety

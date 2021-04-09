@@ -7,28 +7,33 @@ import numpy as np
 
 # Neighborhood class
 class neighborhoods:
-    def __init__(self, file_path):
+    def __init__(self, file_path, id_cols=('nhood_num', 'nhood_name')):
         '''
         file_path: str
                 File path where neighborhoods csv file located.
+        id_cols: tuple of form (x,y). Contain 2 column names to be used as neighborhood id.
+            e.g. ('nhood_num', 'nhood_name') or ('neighborho', 'new_nhood')
+            NOTE that if the csv contain rows with the same id_cols values, the later row
+            information will be used. For example, if somehow 2 neighborhoods has the same
+            nhood_num and nhood_name, information of the 2nd neighborhoods will be used.
         '''
         self.df = pd.read_csv(file_path)
         self.num_nhood = self.df.shape[0]
         # Neighborhood dictionary holds boundary polygon objects
         self.boundaries = {}
-        for i in range(self.df["geometry"].shape[0]):
-            key = str(self.df.loc[i, "FID"]) + "," + self.df.loc[i, "new_nhood"]
-            self.boundaries[key] = Polygon(ast.literal_eval(self.df["geometry"][i])["coordinates"][0])
-        # list of neighborhoods (FIDs, names)
+        for i in range(self.df.shape[0]):
+            key = str(self.df.loc[i, id_cols[0]]) + "," + self.df.loc[i, id_cols[1]]
+            self.boundaries[key] = Polygon(ast.literal_eval(self.df["geometry.coordinates"][i])[0])
+        # list of neighborhoods (nhood_num, nhood_name)
         self.nhoods = list(self.boundaries.keys())
                     
     # Function that return neighborhood identification of a location
     def which_nhood(self, row, df=False, lng="lng", lat="lat", nhood="all"):
         '''
-        Return a neighborhood idenfication (FID and name) which a location (gps coordinate)
+        Return a neighborhood idenfication (nhood_num and name) which a location (gps coordinate)
         belongs to.
         ***ATTENTION***
-        gps that is ON (instead of inside) a boundary is also counted as inside.
+        gps point that is ON (instead of inside) a boundary is also counted as inside.
         ------------------------------------------
         row: tuple, list OR dataframe rows
                 If df=True, row=dataframe row.
@@ -66,7 +71,7 @@ class neighborhoods:
             if name in nhood:
                 return inside_check()
             else: # Not in selected list, return FID and original name
-                return f"{self.get_FID(name)[0]},{name}"
+                return f"{self.get_nhood_num(name)[0]},{name}"
 
     def get_adjacent(self, nhood):
         '''
@@ -79,9 +84,9 @@ class neighborhoods:
         '''
         return [name for name, polygon in self.boundaries.items() if self.boundaries[nhood].touches(polygon)]
 
-    def get_FID(self, nhood):
+    def get_nhood_num(self, nhood):
         '''
-        Return FID/FIDs(list) of a neighborhood (by name)
+        Return nhood_num/nhood_nums(list) of a neighborhood (by name)
         '''
-        FIDs = [x.split(",")[0] for x in self.nhoods if x.split(",")[1]==nhood]
-        return FIDs
+        nhood_nums = [x.split(",")[0] for x in self.nhoods if x.split(",")[1]==nhood]
+        return nhood_nums
