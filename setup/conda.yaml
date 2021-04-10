@@ -11,11 +11,14 @@ dependencies:
 - matplotlib
 - seaborn
 - pandas
+- geopandas # for conveniently working with geoJSON files.
+- descartes # for ploting with geopandas.
 - numpy
 - scikit-learn
 - shapely # For working with neighborhood boundary polygons.
 - pip:
   - APScheduler # for scheduling Tweets gather.
+  - jsonmerge # used to merge json files since results from API can have multiple pages.
   - tweepy # API to gather tweets.
   - tensorflow # also support GPU if compatible NVIDIA GPU exists.
 name: improve_neighborhood_safety

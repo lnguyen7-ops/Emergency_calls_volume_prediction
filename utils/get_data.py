@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import json
+# used to merge json files
+from jsonmerge import Merger
 import requests
 import datetime
 
@@ -95,29 +97,76 @@ def get_911_records_Detroit(date_start, date_end, last_30_days=False):
     df.rename(columns={'call_timestamp': 'call_timestamp_EST'}, inplace=True)
     return df
 
-def get_neighborhood_boundary_Detroit():
+def get_unit_boundary_Detroit(unit):
     '''
-    Get neighborhood boundaries data from City of Detroit databse.
+    Get unit (neighborhood or city block) boundaries data from City of Detroit databse.
+    ------------------------------------------------------------------------
+    unit: str. 'nhood' or 'block'
     -------------------------------------------------------------------
-    return: geoJSON. No file will be written to system.
+    return: geoJSON. No file/files will be written to system.
     '''
-    # Detroit neighborhoods GEOJSON API
-    api_endpoint = 'https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/Current_City_of_Detroit_Neighborhoods/FeatureServer/0/query'
-    payload = {'where': '1=1', # WHERE clause in SQL. Required by database
-               'outFields': '*', # output field. wildcard * means all.
-               'geometryType': 'esriGeometryPolygon',
-               'f': 'geoJSON'}
-    # Detroit neighborhoods polygons
-    r = requests.get(api_endpoint, params=payload)
-    data = r.json()
-    # Check for errors
-    if r.status_code != 200:
-        print('Errors from API: ', r.status_code)
-    # if query error
-    if 'error' in data:
-        print('Error messages from ArcGIS API:')
-        print('\n'.join(data['error']['details']))
-    return data
+    if unit=='nhood':
+        # Detroit neighborhoods GEOJSON API
+        api_endpoint = 'https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/Current_City_of_Detroit_Neighborhoods/FeatureServer/0/query'
+    elif unit=='block':
+        # Detroit city block GEOJSON API
+        api_endpoint = 'https://services2.arcgis.com/HsXtOCMp1Nis1Ogr/arcgis/rest/services/DetroitBlocks2010/FeatureServer/0/query'
+    else:
+        print('Invalid unit. Use "nhood" or "block"')
+
+    # initialize
+    geojson = None
+    # json merging schema, if there are more than one json file.
+    # In this case, append the 'features' list when merging json file. Other keys will use overwritten method.
+    schema = {"properties": {"features": {"mergeStrategy": "append"}}}
+    merger = Merger(schema)
+
+    num_page = 0 # count number of result pages.
+    result_offset = 0
+    next_page = True
+    while next_page:
+        payload = {'where': '1=1', # WHERE clause in SQL. Required by database
+                   'outFields': '*', # output field. wildcard * means all.
+                   'geometryType': 'esriGeometryPolygon',
+                   'orderByFields': 'OBJECTID',
+                   'resultOffset': str(result_offset),
+                   'resultType': 'standard',
+                   'f': 'geoJSON'}
+        # Detroit neighborhoods polygons
+        print('-'*50)
+        print(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Sending request ...')
+        r = requests.get(api_endpoint, params=payload)
+        print(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Received.')
+        data = r.json()
+        # Check for errors
+        if r.status_code != 200:
+            print('Errors from API: ', r.status_code)
+            return geojson
+
+        # if query error
+        if 'error' in data:
+            print('Error messages from ArcGIS API:')
+            print('\n'.join(data['error']['details']))
+            return geojson
+
+        # merge geoJSON file
+        if geojson != None:
+            geojson = merger.merge(geojson, data)
+        else:
+            geojson = data
+
+        # check for next page
+        if 'properties' in data:
+            if 'exceededTransferLimit' in data['properties'] and data['properties']['exceededTransferLimit']==True:
+                result_offset += len(data['features'])
+            else:
+                next_page = False
+        else:
+            next_page = False
+        num_page += 1
+    print('Number of records: ', len(geojson['features']))
+    print('Number of pages: ', num_page)
+    return geojson
 
 def boundary_json_to_df(geojson):
     '''
