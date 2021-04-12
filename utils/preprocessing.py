@@ -1,4 +1,5 @@
 import pandas as pd
+import pathlib
 import ast
 
 class Preprocess:        
@@ -314,5 +315,7 @@ def process_data_dashboard(years):
     # strip leading and trailing white spaces of data in object type columns.
     for col in df.select_dtypes(include="object").columns:
                 df[col] = df[col].str.strip()
+    # replace '' in priority to 'unknown'
+    df['priority'] = df['priority'].apply(lambda x: 'unknown' if x=='' else x)
     # write to csv file
     df.to_csv('../data/processed/911_Calls_for_dashboard.csv', mode="w", header=True, index=False)

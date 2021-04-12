@@ -12,7 +12,7 @@ from dash.dependencies import Input, Output
 # to be used with date_picker
 from datetime import datetime as dt
 
-from utils import process_data_dashboard
+from utils import preprocessing
 
 # Using style css sheet by chriddyp
 # https://codepen.io/chriddyp/pen/bWLwgP
@@ -27,16 +27,16 @@ app = dash.Dash(__name__)
 directory = pathlib.Path('../data/processed/')
 # define the filename pattern
 name_pattern = f"911_Calls_for_dashboard.csv"
-if len(directory.glob(name_pattern)) == 0:
+if len(list(directory.glob(name_pattern))) == 0:
 	# Select years of data to include
 	years = [2021]
-	process_data_dashboard(years)
+	preprocessing.process_data_dashboard(years)
 df = pd.read_csv('../data/processed/911_Calls_for_dashboard.csv', 
 	thousands=",", dtype={'priority':'str'})
 
 
-#print(df.info())
-#print(df['call_timestamp_EST'].head(5))
+# print(df.info())
+# print(df['call_timestamp_EST'].head(5))
 # print(df['zip_code'].unique())
 # print(df['priority'].unique())
 

@@ -4,3 +4,6 @@ geckodriver.log
 *checkpoint*/
 __pycache__/
 *.pyc
+
+# PIP custom package directory
+improve_neighborhood_safety.egg-info/
