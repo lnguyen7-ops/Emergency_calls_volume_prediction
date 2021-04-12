@@ -6,16 +6,19 @@ dependencies:
 - python=3.8
 - jupyter
 - jupyterlab
+# Plotting utilities
 - dash # Dash by Plotly to create dashboard
 - plotly
 - matplotlib
 - seaborn
+# Dataframe
 - pandas
+- numpy
 - geopandas # for conveniently working with geoJSON files.
 - descartes # for ploting with geopandas.
-- numpy
-- scikit-learn
 - shapely # For working with neighborhood boundary polygons.
+# ML
+- scikit-learn
 - pip:
   - APScheduler # for scheduling Tweets gather.
   - jsonmerge # used to merge json files since results from API can have multiple pages.

@@ -276,3 +276,43 @@ class Preprocess:
         df.fillna(0, inplace=True)
         df.columns = cols
         return df.astype("uint32")
+
+# Processing function of dashboard data
+def process_data_dashboard(years):
+    '''
+    Pre-process 911 calls data (from seperate raw csv files) for dashboard_eda app.
+    -----------------------------------------------------------------
+    years: list of int. Years of 911 call data to process.
+    ------------------------------------------------------------------------
+    return: None. Write clean data to csv file.
+    '''
+    # Select years of data to include
+    files = [] # list of data files
+    for year in years:
+        # define the path
+        current_directory = pathlib.Path('../data/raw/Detroit_911_calls/')
+        # define the filename pattern
+        name_pattern = f"911_Calls_{year}*.csv"
+        # Add match files to the files list
+        files += [str(x) for x in current_directory.glob(name_pattern)]
+    # Print out list of files
+    print('Reading 911 calls files ...')
+    [print(file) for file in files]
+    df = pd.DataFrame()
+    for file in files:
+        df = pd.concat([df, pd.read_csv(file, thousands=",", dtype={'priority':'str'})], axis=0)
+    # FORMAT and CLEAN UP a bit
+    # Drop duplicates (using incident_id) if exists
+    df.drop_duplicates(subset=["incident_id"], inplace=True, ignore_index=True)
+    # the current call_timestamp is timezone aware, e.g. '2021-04-06 13:00:00-05:00'
+    # I will keep only the naive portion, as in EST time as '2021-04-06 13:00:00'
+    df['call_timestamp_EST'] = df['call_timestamp_EST'].apply(lambda x: x[:19]).astype('datetime64')
+    # Drop unnecessary columns
+    df.drop(columns=['oid', 'ObjectId', 'precinct_sca'])
+    # clean up zip_code
+    df['zip_code'] = df['zip_code'].apply(lambda x: 0 if x==' '*5 else x).astype('int')
+    # strip leading and trailing white spaces of data in object type columns.
+    for col in df.select_dtypes(include="object").columns:
+                df[col] = df[col].str.strip()
+    # write to csv file
+    df.to_csv('../data/processed/911_Calls_for_dashboard.csv', mode="w", header=True, index=False)
