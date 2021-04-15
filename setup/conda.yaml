@@ -22,6 +22,7 @@ dependencies:
 - pip:
   - APScheduler # for scheduling Tweets gather.
   - jsonmerge # used to merge json files since results from API can have multiple pages.
+  - dash-ui # add on package to implement grid layout for dash
   - tweepy # API to gather tweets.
   - tensorflow # also support GPU if compatible NVIDIA GPU exists.
 name: improve_neighborhood_safety

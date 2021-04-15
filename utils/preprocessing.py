@@ -309,7 +309,7 @@ def process_data_dashboard(years):
     # I will keep only the naive portion, as in EST time as '2021-04-06 13:00:00'
     df['call_timestamp_EST'] = df['call_timestamp_EST'].apply(lambda x: x[:19]).astype('datetime64')
     # Drop unnecessary columns
-    df.drop(columns=['oid', 'ObjectId', 'precinct_sca'])
+    df.drop(columns=['oid', 'ObjectId', 'precinct_sca'], inplace=True)
     # clean up zip_code
     df['zip_code'] = df['zip_code'].apply(lambda x: 0 if x==' '*5 else x).astype('int')
     # strip leading and trailing white spaces of data in object type columns.
@@ -317,5 +317,74 @@ def process_data_dashboard(years):
                 df[col] = df[col].str.strip()
     # replace '' in priority to 'unknown'
     df['priority'] = df['priority'].apply(lambda x: 'unknown' if x=='' else x)
+    # clean block_id
+    df['block_id'] = df['block_id'].fillna('unknown').astype('str')
+    df['block_id'] = df['block_id'].apply(lambda x: x[:15]) # Don't keep the decimal portion of the number string.
+    df['neighborhood'].fillna('unknown', inplace=True)
     # write to csv file
     df.to_csv('../data/processed/911_Calls_for_dashboard.csv', mode="w", header=True, index=False)
+
+# Group data by time.
+# NOTE this is different than the time_groupby method of proprocessing class, which break down to neighborhood level.
+def time_groupby(df, dt_col, agg_col, agg="count", freq="180Min"):
+        '''
+        Return a series of rows aggregated by : **UNIQUE COUNT** or average, per each time interval (index)
+        -------------------------------------------------------------------
+        df: dataframe. 
+            Must contain one datetime column as indicated by dt_col arg.
+        col: str
+                Column name to aggregate by.
+        agg: str
+                Aggregation method: "count" or "avg"
+        freq: str (e.g. "180Min")
+                Time interval (in minutes) to groupby.
+        -------------------------------------------------------------------
+        return: Series.
+        '''
+        # Prepare input dataframe to have datime index
+        # Sort call_timestamp in ascending order
+        df = df.sort_values(by=dt_col, axis=0, 
+                      ascending=True, ignore_index=True)
+        # Set call_timestamp as index
+        df = df.set_index(dt_col)
+        if agg=="count":
+            # groupby time interval (count only).
+            result = df.groupby(pd.Grouper(freq=freq,
+                                         offset=0,
+                                         origin="start_day")).count()[agg_col]
+        elif agg=="avg":
+            # aggregate by average
+            result = df.groupby(pd.Grouper(freq=freq,
+                                         offset=0,
+                                         origin="start_day")).mean()[agg_col]
+        else:
+            print("Aggregation method must be: 'count' or 'avg'.")
+            return
+        # fill nan with zero
+        result.fillna(0, inplace=True)
+        return result
+
+# Group data by a category column
+def cat_groupby(df, cat_col, agg_col, agg='count'):
+    '''
+    Group data by location column.
+    -----------------------------------------
+    df: dataframe
+    cat_col: str. Column name of location column.
+    agg_col: str. Column label of aggregate value column.
+    agg: str. Aggregrate function (e.g. 'count' or 'avg')
+    --------------------------------------------
+    return: Series.
+    '''
+    if df.empty:
+        return df
+    if agg=='count':
+        result = df.groupby([cat_col]).count()[agg_col]
+    elif agg=='avg':
+        result = df.groupby([cat_col]).mean()[agg_col]
+    else:
+        print("Aggregation method must be: 'count' or 'avg'.")
+        return
+    # fill nan with zero
+    result.fillna(0, inplace=True)
+    return result
