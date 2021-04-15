@@ -40,7 +40,7 @@
   width: 100%;
   max-width: 1920px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 10px;
   box-sizing: border-box; }
 .column,
 .columns {
@@ -58,10 +58,11 @@
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   .container {
-    width: 80%; }
+    width: 95%; }
   .column,
   .columns {
-    margin-left: 4%; }
+    margin-left: 0%;
+    margin-right: 0; }
   .column:first-child,
   .columns:first-child {
     margin-left: 0; }
