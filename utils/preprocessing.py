@@ -1,6 +1,7 @@
 import pandas as pd
 import pathlib
 import ast
+import vaex
 
 class Preprocess:        
     def __init__(self, city):
@@ -327,42 +328,66 @@ def process_data_dashboard(years):
 # Group data by time.
 # NOTE this is different than the time_groupby method of proprocessing class, which break down to neighborhood level.
 def time_groupby(df, dt_col, agg_col, agg="count", freq="180Min"):
-        '''
-        Return a series of rows aggregated by : **UNIQUE COUNT** or average, per each time interval (index)
-        -------------------------------------------------------------------
-        df: dataframe. 
-            Must contain one datetime column as indicated by dt_col arg.
-        col: str
-                Column name to aggregate by.
-        agg: str
-                Aggregation method: "count" or "avg"
-        freq: str (e.g. "180Min")
-                Time interval (in minutes) to groupby.
-        -------------------------------------------------------------------
-        return: Series.
-        '''
-        # Prepare input dataframe to have datime index
-        # Sort call_timestamp in ascending order
-        df = df.sort_values(by=dt_col, axis=0, 
-                      ascending=True, ignore_index=True)
-        # Set call_timestamp as index
-        df = df.set_index(dt_col)
-        if agg=="count":
-            # groupby time interval (count only).
-            result = df.groupby(pd.Grouper(freq=freq,
-                                         offset=0,
-                                         origin="start_day")).count()[agg_col]
-        elif agg=="avg":
-            # aggregate by average
-            result = df.groupby(pd.Grouper(freq=freq,
-                                         offset=0,
-                                         origin="start_day")).mean()[agg_col]
-        else:
-            print("Aggregation method must be: 'count' or 'avg'.")
-            return
-        # fill nan with zero
-        result.fillna(0, inplace=True)
-        return result
+    '''
+    Return a series of rows aggregated by : **UNIQUE COUNT** or average, per each time interval (index)
+    -------------------------------------------------------------------
+    df: dataframe. Must contain one datetime column as indicated by dt_col arg.
+    dt_col: str. Column name of datetime to aggregate by.
+    agg_col: str. Name of column to agg by.
+    agg: str. Aggregation method: "count" or "avg"
+    freq: str (e.g. "180Min"). Time interval (in minutes) to groupby.
+    -------------------------------------------------------------------
+    return: Series.
+    '''
+    # Prepare input dataframe to have datime index
+    # Sort call_timestamp in ascending order
+    # Note that this sorting step actually REDUCE the execution time overall, IMPROVE performance.
+    df = df.sort_values(by=dt_col, axis=0, 
+                  ascending=True, ignore_index=True)
+    # Set call_timestamp as index
+    df = df.set_index(dt_col)
+    if agg=="count":
+        # groupby time interval (count only).
+        result = df.groupby(pd.Grouper(freq=freq,
+                                     offset=0,
+                                     origin="start_day")).count()[agg_col]
+    elif agg=="avg":
+        # aggregate by average
+        result = df.groupby(pd.Grouper(freq=freq,
+                                     offset=0,
+                                     origin="start_day")).mean()[agg_col]
+    else:
+        print("Aggregation method must be: 'count' or 'avg'.")
+        return
+    # fill nan with zero
+    result.fillna(0, inplace=True)
+    return result
+
+def time_groupby_vaex(df, dt_col, agg_col, agg='count', freq='D'):
+    '''
+    Return a vaex dataframe of aggregration by selected time column and frequency.
+    -------------------------------------------------------------------------------
+    df: Vaex dataframe. Must contain one datetime column
+    dt_col: str. Column name of datetime to aggregate by.
+    agg_col: str. Name of column to agg by.
+    agg: str. Aggregation method: "count" or "avg"
+    freq: str. Time interval to groupby (e.g. "h", groupby hourly).
+        Possible values: 'm', 'h', 'D', 'W', 'M' 
+    -------------------------------------------------------------------
+    return: Vaex dataframe with 2 columns: dt_col, agg
+
+    '''
+    agg_dict = {'count': vaex.agg.count,
+                'avg': vaex.agg.mean,
+                'first': vaex.agg.first,
+                'max': vaex.agg.max,
+                'min': vaex.agg.min,
+                'nunique': vaex.agg.nunique}
+    try:
+        return df.groupby(vaex.BinnerTime(df[dt_col], resolution=freq), agg={f'{agg}': agg_dict[agg](agg_col)})
+    except KeyError:
+        print(f'Aggregation method must be one of :{list(agg_dict.keys())}')
+        return
 
 # Group data by a category column
 def cat_groupby(df, cat_col, agg_col, agg='count'):
