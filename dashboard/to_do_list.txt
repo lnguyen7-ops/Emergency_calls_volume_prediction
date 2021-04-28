@@ -1,0 +1,52 @@
+Not done: 	-
+Done: 		x-
+Maybe: 		*-
+
+
+x- Map: add back 
+	- 'city block'
+	- 'neighborhood' choropleth.
+
+- Call category plot: map the call category to more understandable words. Do this after category aggregation for better speed.
+	- Bar plot axis still use abbreviation on y-axis to save space but hover should shows details.
+	- Category selection dropdown should show descriptive version.
+
+x- Time plot: Add day of week name to hoover data.
+
+- Data filtering: Add categorical options for
+	- Hour of day
+	- Day of week
+	- Month of year
+
+*- UI: Change 'start date' and 'end date' to allow for invidual entry ot year, month, date for quicker selection
+
+x- UI: add filled bar to indicate how much data were selected.
+
+x- UI: End date in title line update with last date in dataset.
+
+- Hist plot: Add seperate line for each call priority. Or maybe just the top 3 priorities.
+
+- Hist plot: Add MEDIAN markders
+
+x- Functions: fix functions for properuse of 'selection' in vaex, instead of always set 'selection'=True
+
+x- Choropleth: only switch to block-level vieew after certain zoom.
+	This is because rendering all 19K geojson blocks is too laggy. Therefore, only render a few blocks.
+
+- Comment on the fact that when trying to specify selection name (e.g. name='some_name') in .select() and pass on to other sub-sequence filter, the filter process got messed up. Incorrect data were returned. Lots of data were missing as well.
+
+- Choropleth: See a way to improve performance when panning the map in City-Block view.
+
+- Graphs: switch to specifing RELATIVE size instead of absolute pix so account for different device screens.
+
+- Data filtering: RETHINK about throwing data with negative time.
+
+- Data filtering: Dynamic update of sub-sequence dropdowns.
+
+- Data filtering: Call-made-by-officer dropdown change to check box: Call made by: Resident, Officer
+
+- Category dropdown: Show the most common categories first.
+
+- Interactivity between graphs: clicking on graph elements actually trigger filter.
+
+- Filter: Perhaps all the continuous features (i.e. times) should be changed to small distribution graph where user can actually select the range on there.

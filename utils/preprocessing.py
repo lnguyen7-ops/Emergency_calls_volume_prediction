@@ -303,25 +303,41 @@ def process_data_dashboard(years):
     df = pd.DataFrame()
     for file in files:
         df = pd.concat([df, pd.read_csv(file, thousands=",", dtype={'priority':'str'})], axis=0)
+
+
     # FORMAT and CLEAN UP a bit
     # Drop duplicates (using incident_id) if exists
     df.drop_duplicates(subset=["incident_id"], inplace=True, ignore_index=True)
+
     # the current call_timestamp is timezone aware, e.g. '2021-04-06 13:00:00-05:00'
     # I will keep only the naive portion, as in EST time as '2021-04-06 13:00:00'
     df['call_timestamp_EST'] = df['call_timestamp_EST'].apply(lambda x: x[:19]).astype('datetime64')
+
     # Drop unnecessary columns
     df.drop(columns=['oid', 'ObjectId', 'precinct_sca'], inplace=True)
+
     # clean up zip_code
     df['zip_code'] = df['zip_code'].apply(lambda x: 0 if x==' '*5 else x).astype('int')
+
     # strip leading and trailing white spaces of data in object type columns.
     for col in df.select_dtypes(include="object").columns:
                 df[col] = df[col].str.strip()
+
     # replace '' in priority to 'unknown'
     df['priority'] = df['priority'].apply(lambda x: 'unknown' if x=='' else x)
+
     # clean block_id
     df['block_id'] = df['block_id'].fillna('unknown').astype('str')
+
     df['block_id'] = df['block_id'].apply(lambda x: x[:15]) # Don't keep the decimal portion of the number string.
-    df['neighborhood'].fillna('unknown', inplace=True)
+
+    df['neighborhood'].fillna('unknown', inplace=True) # fill unknown neighborhood.
+
+
+    # Add a category detail, which contain more descriptive info of the category abbreviation
+    # Mapping: key: category abbreviation (in dataframe)
+    # value: descriptive information
+
     # write to csv file
     df.to_csv('../data/processed/911_Calls_for_dashboard.csv', mode="w", header=True, index=False)
 
@@ -363,7 +379,7 @@ def time_groupby(df, dt_col, agg_col, agg="count", freq="180Min"):
     result.fillna(0, inplace=True)
     return result
 
-def time_groupby_vaex(df, dt_col, agg_col, agg='count', freq='D'):
+def time_groupby_vaex(df, dt_col, agg_col, selection=False, agg='count', freq='D'):
     '''
     Return a vaex dataframe of aggregration by selected time column and frequency.
     -------------------------------------------------------------------------------
@@ -384,7 +400,9 @@ def time_groupby_vaex(df, dt_col, agg_col, agg='count', freq='D'):
                 'min': vaex.agg.min,
                 'nunique': vaex.agg.nunique}
     try:
-        return df.groupby(vaex.BinnerTime(df[dt_col], resolution=freq), agg={f'{agg}': agg_dict[agg](agg_col)})
+        # Use .filter() first to remove non-selected time bins , somehow cause error.
+        # Therefore, non-selected time bins will be kept with agg = 0
+        return df.groupby(vaex.BinnerTime(df[dt_col], resolution=freq), agg={f'{agg}': agg_dict[agg](agg_col, selection=selection)})
     except KeyError:
         print(f'Aggregation method must be one of :{list(agg_dict.keys())}')
         return
@@ -395,7 +413,7 @@ def cat_groupby(df, cat_col, agg_col, agg='count'):
     Group data by location column.
     -----------------------------------------
     df: dataframe
-    cat_col: str. Column name of location column.
+    cat_col: str. Column name to create category grouping.
     agg_col: str. Column label of aggregate value column.
     agg: str. Aggregrate function (e.g. 'count' or 'avg')
     --------------------------------------------
@@ -413,3 +431,17 @@ def cat_groupby(df, cat_col, agg_col, agg='count'):
     # fill nan with zero
     result.fillna(0, inplace=True)
     return result
+
+def cat_groupby_vaex(df, cat_col, agg_col, selection=False, agg='count') -> vaex.dataframe.DataFrameLocal:
+    agg_dict = {'count': vaex.agg.count,
+                'avg': vaex.agg.mean,
+                'first': vaex.agg.first,
+                'max': vaex.agg.max,
+                'min': vaex.agg.min,
+                'nunique': vaex.agg.nunique}
+    try:
+        # Use .filter() first to remove non-selected category
+        return df.filter('default').groupby(cat_col, agg={f'{agg}': agg_dict[agg](agg_col)})
+    except KeyError:
+        print(f'Aggregation method must be one of :{list(agg_dict.keys())}')
+        return
